@@ -92,6 +92,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>Comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -145,12 +146,16 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FileSearcher.h" />
+    <ClInclude Include="FolderBrowserDialog.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="SearchingFiles.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="FileSearcher.cpp" />
+    <ClCompile Include="FolderBrowserDialog.cpp" />
     <ClCompile Include="SearchingFiles.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -163,8 +168,18 @@
     <ResourceCompile Include="SearchingFiles.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\..\..\..\..\Desktop\ListView_MSDN_1994\BEL.ICO" />
+    <Image Include="..\..\..\..\..\Desktop\ListView_MSDN_1994\icon5.ico" />
+    <Image Include="..\..\..\..\..\Desktop\ListView_MSDN_1994\LISTVIEW.ICO" />
+    <Image Include="..\..\..\..\..\Desktop\ListView_MSDN_1994\RED.ICO" />
+    <Image Include="..\..\..\..\..\Desktop\ListView_MSDN_1994\RED2.ICO" />
+    <Image Include="..\..\..\..\..\Desktop\ListView_MSDN_1994\SEA.ICO" />
+    <Image Include="icon1.ico" />
     <Image Include="SearchingFiles.ico" />
     <Image Include="small.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="arrow.cur" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
