@@ -66,22 +66,22 @@
     <Image Include="icon1.ico">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\..\..\..\..\Desktop\ListView_MSDN_1994\BEL.ICO">
+    <Image Include="BEL.ICO">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\..\..\..\..\Desktop\ListView_MSDN_1994\icon5.ico">
+    <Image Include="icon5.ico">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\..\..\..\..\Desktop\ListView_MSDN_1994\LISTVIEW.ICO">
+    <Image Include="LISTVIEW.ICO">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\..\..\..\..\Desktop\ListView_MSDN_1994\RED.ICO">
+    <Image Include="RED.ICO">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\..\..\..\..\Desktop\ListView_MSDN_1994\RED2.ICO">
+    <Image Include="RED2.ICO">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\..\..\..\..\Desktop\ListView_MSDN_1994\SEA.ICO">
+    <Image Include="SEA.ICO">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

@@ -168,13 +168,13 @@
     <ResourceCompile Include="SearchingFiles.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\..\..\..\Desktop\ListView_MSDN_1994\BEL.ICO" />
-    <Image Include="..\..\..\..\..\Desktop\ListView_MSDN_1994\icon5.ico" />
-    <Image Include="..\..\..\..\..\Desktop\ListView_MSDN_1994\LISTVIEW.ICO" />
-    <Image Include="..\..\..\..\..\Desktop\ListView_MSDN_1994\RED.ICO" />
-    <Image Include="..\..\..\..\..\Desktop\ListView_MSDN_1994\RED2.ICO" />
-    <Image Include="..\..\..\..\..\Desktop\ListView_MSDN_1994\SEA.ICO" />
+    <Image Include="BEL.ICO" />
     <Image Include="icon1.ico" />
+    <Image Include="icon5.ico" />
+    <Image Include="LISTVIEW.ICO" />
+    <Image Include="RED.ICO" />
+    <Image Include="RED2.ICO" />
+    <Image Include="SEA.ICO" />
     <Image Include="SearchingFiles.ico" />
     <Image Include="small.ico" />
   </ItemGroup>
