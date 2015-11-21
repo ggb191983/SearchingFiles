@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "FileSearcher.h"
 #include <strsafe.h>
+#include <string>
+using namespace std;
 #pragma comment(lib, "User32.lib")
 
 #define BUFSIZE MAX_PATH
@@ -107,6 +109,75 @@ void FileSearcher::Search(TCHAR fileName){
 
 	FindClose(hFind);
 }
+
+
+TCHAR * FileSearcher::Search2(const TCHAR * strFile, const TCHAR * strFilePath, const bool& bRecursive, const bool& bStopWhenFound) const
+{
+    TCHAR strFoundFilePath[255];
+    WIN32_FIND_DATA file;
+
+    TCHAR strPathToSearch[255];
+	_tcscpy(strPathToSearch, strFilePath);
+    if (strPathToSearch != _T('\0'))
+        strPathToSearch = IncludeTrailingPathDelimiter(strPathToSearch);
+
+    HANDLE hFile = FindFirstFile((strPathToSearch + "*").c_str(), &file); 
+    if (hFile != INVALID_HANDLE_VALUE) 
+    {
+        std::auto_ptr<TStringList> subDirs;
+
+        do
+        {
+            String strTheNameOfTheFile = file.cFileName;
+
+            // It could be a directory we are looking at
+            // if so look into that dir
+            if (file.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+            {
+                if ((strTheNameOfTheFile != ".") && (strTheNameOfTheFile != "..") && (bRecursive))
+                {
+                    if (subDirs.get() == NULL)
+                        subDirs.reset(new TStringList);
+
+                    subDirs->Add(strPathToSearch + strTheNameOfTheFile);
+                }
+            }
+            else
+            {
+                if (strTheNameOfTheFile == strFile)
+                {
+                    strFoundFilePath = strPathToSearch + strFile;
+
+                    /// TODO
+                    // ADD TO COLLECTION TYPE
+
+                    if (bStopWhenFound)
+                        break;
+                }
+            }
+        }
+        while (FindNextFile(hFile, &file));
+
+        FindClose(hFile);
+
+        if (!strFoundFilePath.IsEmpty() && bStopWhenFound)
+            return strFoundFilePath;
+
+        if (subDirs.get() != NULL)
+        {
+            for (int i = 0; i < subDirs->Count; ++i)
+            {
+                strFoundFilePath = Search2(strFile, subDirs->Strings[i], bRecursive, bStopWhenFound);
+
+                if (!strFoundFilePath.IsEmpty() && bStopWhenFound)
+                    break;
+            }
+        }
+    }
+
+    return strFoundFilePath;
+}
+
 void FileSearcher::DisplayErrorBox(LPTSTR lpszFunction) 
 { 
 	// Retrieve the system error message for the last-error code
