@@ -10,7 +10,7 @@ class FileSearcher
 public:	
 	void DisplayErrorBox(LPTSTR lpszFunction);
 	void Search(TCHAR fileName);
-	TCHAR * Search2(const TCHAR * strFile, const TCHAR * strFilePath, const bool& bRecursive, const bool& bStopWhenFound) const;
+	void FindFilesRecursively(LPCTSTR lpFolder, LPCTSTR lpFilePattern);
 	~FileSearcher(void);
 
 	void ChangeDirectory(TCHAR *dir);	

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "FileSearcher.h"
 #include <strsafe.h>
-#include <string>
+
 using namespace std;
 #pragma comment(lib, "User32.lib")
 
@@ -111,71 +111,43 @@ void FileSearcher::Search(TCHAR fileName){
 }
 
 
-TCHAR * FileSearcher::Search2(const TCHAR * strFile, const TCHAR * strFilePath, const bool& bRecursive, const bool& bStopWhenFound) const
+void FileSearcher::FindFilesRecursively(LPCTSTR lpFolder, LPCTSTR lpFilePattern)
 {
-    TCHAR strFoundFilePath[255];
-    WIN32_FIND_DATA file;
-
-    TCHAR strPathToSearch[255];
-	_tcscpy(strPathToSearch, strFilePath);
-    if (strPathToSearch != _T('\0'))
-        strPathToSearch = IncludeTrailingPathDelimiter(strPathToSearch);
-
-    HANDLE hFile = FindFirstFile((strPathToSearch + "*").c_str(), &file); 
-    if (hFile != INVALID_HANDLE_VALUE) 
-    {
-        std::auto_ptr<TStringList> subDirs;
-
-        do
-        {
-            String strTheNameOfTheFile = file.cFileName;
-
-            // It could be a directory we are looking at
-            // if so look into that dir
-            if (file.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-            {
-                if ((strTheNameOfTheFile != ".") && (strTheNameOfTheFile != "..") && (bRecursive))
-                {
-                    if (subDirs.get() == NULL)
-                        subDirs.reset(new TStringList);
-
-                    subDirs->Add(strPathToSearch + strTheNameOfTheFile);
-                }
-            }
-            else
-            {
-                if (strTheNameOfTheFile == strFile)
-                {
-                    strFoundFilePath = strPathToSearch + strFile;
-
-                    /// TODO
-                    // ADD TO COLLECTION TYPE
-
-                    if (bStopWhenFound)
-                        break;
-                }
-            }
-        }
-        while (FindNextFile(hFile, &file));
-
-        FindClose(hFile);
-
-        if (!strFoundFilePath.IsEmpty() && bStopWhenFound)
-            return strFoundFilePath;
-
-        if (subDirs.get() != NULL)
-        {
-            for (int i = 0; i < subDirs->Count; ++i)
-            {
-                strFoundFilePath = Search2(strFile, subDirs->Strings[i], bRecursive, bStopWhenFound);
-
-                if (!strFoundFilePath.IsEmpty() && bStopWhenFound)
-                    break;
-            }
-        }
-    }
-
-    return strFoundFilePath;
+	TCHAR szFullPattern[MAX_PATH];
+	WIN32_FIND_DATA FindFileData;
+	HANDLE hFindFile;
+	// first we are going to process any subdirectories
+	PathCombine(szFullPattern, lpFolder, _T("*"));
+	hFindFile = FindFirstFile(szFullPattern, &FindFileData);
+	if (hFindFile != INVALID_HANDLE_VALUE)
+	{
+		do
+		{
+			if (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+			{
+				// found a subdirectory; recurse into it
+				PathCombine(szFullPattern, lpFolder, FindFileData.cFileName);
+				FindFilesRecursively(szFullPattern, lpPattern);
+			}
+		} while (FindNextFile(hFindFile, &FindFileData));
+		FindClose(hFindFile);
+	}
+	// now we are going to look for the matching files
+	PathCombine(szFullPattern, lpFolder, lpFilePattern);
+	hFindFile = FindFirstFile(szFullPattern, &FindFileData);
+	if (hFindFile != INVALID_HANDLE_VALUE)
+	{
+		do
+		{
+			if (!(FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+			{
+				// found a file; do something with it
+				PathCombine(szFullPattern, lpFolder, FindFileData.cFileName);
+				_tprintf_s(_T("%s\n"), szFullPattern);
+			}
+		} while (FindNextFile(hFindFile, &FindFileData));
+		FindClose(hFindFile);
+	}
 }
 
 void FileSearcher::DisplayErrorBox(LPTSTR lpszFunction) 
