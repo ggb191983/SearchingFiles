@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #include "FileSearcher.h"
+#include <windows.h>
+#include <stdio.h>
 #include <strsafe.h>
+#include "Shlwapi.h"
 
 using namespace std;
 #pragma comment(lib, "User32.lib")
@@ -117,7 +120,7 @@ void FileSearcher::FindFilesRecursively(LPCTSTR lpFolder, LPCTSTR lpFilePattern)
 	WIN32_FIND_DATA FindFileData;
 	HANDLE hFindFile;
 	// first we are going to process any subdirectories
-	PathCombine(szFullPattern, lpFolder, _T("*"));
+	PathCombine(szFullPattern, lpFolder, _T("*"));//FindFilesRecursively(_T("C:\\WINDOWS"), _T("*.wav"));
 	hFindFile = FindFirstFile(szFullPattern, &FindFileData);
 	if (hFindFile != INVALID_HANDLE_VALUE)
 	{
@@ -127,7 +130,9 @@ void FileSearcher::FindFilesRecursively(LPCTSTR lpFolder, LPCTSTR lpFilePattern)
 			{
 				// found a subdirectory; recurse into it
 				PathCombine(szFullPattern, lpFolder, FindFileData.cFileName);
-				FindFilesRecursively(szFullPattern, lpPattern);
+				if (FindFileData.cFileName[0] == '.')
+					continue;
+				FindFilesRecursively(szFullPattern, lpFilePattern);				
 			}
 		} while (FindNextFile(hFindFile, &FindFileData));
 		FindClose(hFindFile);
@@ -142,7 +147,7 @@ void FileSearcher::FindFilesRecursively(LPCTSTR lpFolder, LPCTSTR lpFilePattern)
 			if (!(FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
 			{
 				// found a file; do something with it
-				PathCombine(szFullPattern, lpFolder, FindFileData.cFileName);
+				PathCombine(szFullPattern, lpFolder, FindFileData.cFileName);				
 				_tprintf_s(_T("%s\n"), szFullPattern);
 			}
 		} while (FindNextFile(hFindFile, &FindFileData));

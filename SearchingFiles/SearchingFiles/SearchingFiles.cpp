@@ -10,17 +10,17 @@
 #include "resource.h"
 
 // global array of houses
-HOUSEINFO rgHouseInfo[] =
+FILEINFO rgFileInfo[] =
 {
-	{ "100 Main Street", "Redmond", 175000, 3, 2 },
-	{ "523 Pine Lake Road", "Redmond", 125000, 4, 2 },
-	{ "1212 112th Place SE", "Redmond",200000, 4, 3 },
-	{ "22 Lake Washington Blvd", "Bellevue", 2500000, 4, 4 },
-	{ "33542 116th Ave. NE", "Bellevue", 180000, 3, 2 },
-	{ "64134 Nicholas Lane", "Bellevue", 250000, 4, 3 },
-	{ "33 Queen Anne Hill", "Seattle", 350000, 3, 2 },
-	{ "555 SE Fifth St", "Seattle", 140000, 3, 2 },
-	{ "446 Mariners Way", "Seattle", 225000, 4, 3 }
+	{ _T("100 Main Street"), _T("Redmond"), 175000, 3, 2 },
+	{ _T("523 Pine Lake Road"), _T("Redmond"), 125000, 4, 2 },
+	{ _T("1212 112th Place SE"), _T("Redmond"),200000, 4, 3 },
+	{ _T("22 Lake Washington Blvd"), _T("Bellevue"), 2500000, 4, 4 },
+	{ _T("33542 116th Ave. NE"), _T("Bellevue"), 180000, 3, 2 },
+	{ _T("64134 Nicholas Lane"), _T("Bellevue"), 250000, 4, 3 },
+	{ _T("33 Queen Anne Hill"), _T("Seattle"), 350000, 3, 2 },
+	{ _T("555 SE Fifth St"), _T("Seattle"), 140000, 3, 2 },
+	{ _T("446 Mariners Way"), _T("Seattle"), 225000, 4, 3 }
 };
 
 FolderBrowserDialog *folderBrowserDialog1 = new FolderBrowserDialog();
@@ -94,9 +94,11 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_SEARCHINGFILES));
 
+	//FileSearcher::instance()->FindFilesRecursively(_T("C:\\WINDOWS"), _T("*.wav"));
+
 	//while (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
 	//{
-	while (GetMessage(&msg, NULL, 0, 0)>0) {
+	while (GetMessage(&msg, NULL, 0, 0) > 0) {
 		if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
 		{
 			TranslateMessage(&msg);
@@ -206,7 +208,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			NULL);
 		hfDefault = GetStockObject(DEFAULT_GUI_FONT);
 		SendMessage(hEdit, WM_SETFONT, (WPARAM)hfDefault, MAKELPARAM(FALSE, 0));
-		SendMessage(hEdit, WM_SETTEXT, NULL, (LPARAM)_T("Insert text here..."));
+		SendMessage(hEdit, WM_SETTEXT, NULL, (LPARAM)_T("Fichero a buscar..."));
 		hWndButton = CreateWindowEx(NULL,
 			_T("BUTTON"),
 			_T("Search"),
@@ -221,10 +223,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			GetModuleHandle(NULL),
 			NULL);
 		SendMessage(hWndButton, WM_SETFONT, (WPARAM)hfDefault, MAKELPARAM(FALSE, 0));
-		//hWndListView =  CreateAListView(hWnd);	
-		//InitListViewColumns(hWndListView);
-		CreateListView(hWnd);
+
+		hWndListView = CreateListView(hWnd);
+		if (hWndListView == NULL)
+			MessageBox(NULL, _T("Listview not created!"), NULL, MB_OK);
+
 		break;
+
+	case WM_NOTIFY:
+		return (NotifyHandler(hWnd, message, wParam, lParam));
+		break;
+
 	case WM_COMMAND:
 		wmId = LOWORD(wParam);
 		wmEvent = HIWORD(wParam);
@@ -232,10 +241,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		switch (wmId)
 		{
 		case IDC_SEARCH_BUTTON:
-			SendMessage(hEdit,
-				WM_GETTEXT,
-				sizeof(szBuffer) / sizeof(szBuffer[0]),
-				reinterpret_cast<LPARAM>(szBuffer));
+			SendMessage(hEdit, WM_GETTEXT, sizeof(szBuffer) / sizeof(szBuffer[0]), reinterpret_cast<LPARAM>(szBuffer));
 			//MessageBox(NULL, szBuffer, TEXT("Information"),	MB_ICONINFORMATION);
 			if (folderBrowserDialog1->ShowDialog())
 			{
@@ -250,7 +256,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case IDM_ABOUT:
 			DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
 			break;
-			case IDM_EXIT:
+		case IDM_EXIT:
 			DestroyWindow(hWnd);
 			break;
 
@@ -327,96 +333,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-// Controlador de mensajes del cuadro Acerca de.
-INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	UNREFERENCED_PARAMETER(lParam);
-	switch (message)
-	{
-	case WM_INITDIALOG:
-		return (INT_PTR)TRUE;
-
-	case WM_COMMAND:
-		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
-		{
-			EndDialog(hDlg, LOWORD(wParam));
-			return (INT_PTR)TRUE;
-		}
-		break;
-	}
-	return (INT_PTR)FALSE;
-}
-
-HWND CreateAListView(HWND hwndParent)
-{
-	RECT rcClient;  // dimensions of client area 
-	HWND hWndListView;    // handle to tree-view control 
-
-						  // Ensure that the common control DLL is loaded. 
-	INITCOMMONCONTROLSEX icex;           // Structure for control initialization.
-	icex.dwICC = ICC_LISTVIEW_CLASSES;
-	InitCommonControlsEx(&icex);
-
-	// The parent window's client area.
-
-	GetClientRect(hwndParent, &rcClient);
-
-	hWndListView = CreateWindow(WC_LISTVIEW,
-		L"",
-		WS_CHILD | LVS_REPORT | LVS_EDITLABELS,
-		0, 40,
-		rcClient.right - rcClient.left,
-		rcClient.bottom - rcClient.top,
-		hwndParent,
-		(HMENU)IDM_LIST_VIEW,
-		GetModuleHandle(NULL),
-		NULL);
-
-	if (!hWndListView)
-		return 0;
-	else
-		return hWndListView;
-}
-
-// InitListViewColumns: Adds columns to a list-view control.
-// hWndListView:        Handle to the list-view control. 
-// Returns TRUE if successful, and FALSE otherwise. 
-BOOL InitListViewColumns(HWND hWndListView)
-{
-	WCHAR szText[256];     // Temporary buffer.
-	LVCOLUMN lvc;
-	int iCol;
-
-	// Initialize the LVCOLUMN structure.
-	// The mask specifies that the format, width, text,
-	// and subitem members of the structure are valid.
-	lvc.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM;
-
-	// Add the columns.
-	for (iCol = 0; iCol < C_COLUMNS; iCol++)
-	{
-		lvc.iSubItem = iCol;
-		lvc.pszText = _T("HOLAAAA");
-		lvc.cx = 100;               // Width of column in pixels.
-
-		if (iCol < 2)
-			lvc.fmt = LVCFMT_LEFT;  // Left-aligned column.
-		else
-			lvc.fmt = LVCFMT_RIGHT; // Right-aligned column.
-
-									// Load the names of the column headings from the string resources.
-		LoadString(GetModuleHandle(NULL), IDS_FIRSTCOLUMN + iCol, szText, sizeof(szText) / sizeof(szText[0]));
-
-		//SendMessage(hWndListView,LVM_INSERTITEM,C_COLUMNS,(LPARAM)&lvc); 
-		// Insert the columns into the list view.
-		if (ListView_InsertColumn(hWndListView, iCol, &lvc) == -1)
-			return FALSE;
-	}
-
-	return TRUE;
-}
-
-
 /****************************************************************************
 *
 *    FUNCTION: CreateListView(HWND)
@@ -459,7 +375,6 @@ HWND CreateListView(HWND hWndParent)
 
 	if (hWndList == NULL)
 		return NULL;
-
 
 	// initialize the list view window
 	// First, initialize the image lists we will need
@@ -507,10 +422,7 @@ HWND CreateListView(HWND hWndParent)
 	for (index = 0; index <= NUM_COLUMNS; index++)
 	{
 		lvC.iSubItem = index;
-		LoadString(GetModuleHandle(NULL),
-			IDS_ADDRESS + index,
-			szText,
-			sizeof(szText));
+		LoadString(GetModuleHandle(NULL), IDS_FILENAME + index, szText,	sizeof(szText));
 		if (ListView_InsertColumn(hWndList, index, &lvC) == -1)
 			return NULL;
 	}
@@ -533,18 +445,123 @@ HWND CreateListView(HWND hWndParent)
 		lvI.pszText = LPSTR_TEXTCALLBACK;
 		lvI.cchTextMax = MAX_ITEMLEN;
 		lvI.iImage = index;
-		lvI.lParam = (LPARAM)&rgHouseInfo[index];
+		lvI.lParam = (LPARAM)&rgFileInfo[index];
 
 		if (ListView_InsertItem(hWndList, &lvI) == -1)
 			return NULL;
 
 		for (iSubItem = 1; iSubItem < NUM_COLUMNS; iSubItem++)
 		{
-			ListView_SetItemText(hWndList,
-				index,
-				iSubItem,
-				LPSTR_TEXTCALLBACK);
+			ListView_SetItemText(hWndList, index, iSubItem,	LPSTR_TEXTCALLBACK);
 		}
 	}
 	return (hWndList);
+}
+
+LRESULT NotifyHandler(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	LV_DISPINFO *pLvdi = (LV_DISPINFO *)lParam;
+	NM_LISTVIEW *pNm = (NM_LISTVIEW *)lParam;
+	FILEINFO *pFileInfo = (FILEINFO *)(pLvdi->item.lParam);
+	static TCHAR szText[10];
+
+	if (wParam != ID_LISTVIEW)
+		return 0L;
+
+	switch (pLvdi->hdr.code)
+	{
+	case LVN_GETDISPINFO:
+
+		switch (pLvdi->item.iSubItem)
+		{
+		case 0:     // Nombre
+			pLvdi->item.pszText = pFileInfo->cFileName;
+			break;
+
+		case 1:     // Tamaño		
+			wsprintf(szText, _T("%ld"), pFileInfo->dwFileSize);
+			pLvdi->item.pszText = szText;
+			break;	
+
+		default:
+			break;
+		}
+		break;
+
+	case LVN_BEGINLABELEDIT:
+	{
+		HWND hWndEdit;
+
+		// Get the handle to the edit box.
+		hWndEdit = (HWND)SendMessage(hWnd, LVM_GETEDITCONTROL, 0, 0);
+		// Limit the amount of text that can be entered.
+		SendMessage(hWndEdit, EM_SETLIMITTEXT, (WPARAM)20, 0);
+	}
+	break;
+
+	case LVN_ENDLABELEDIT:
+		// Save the new label information
+		if ((pLvdi->item.iItem != -1) && (pLvdi->item.pszText != NULL))
+			lstrcpy(pFileInfo->cFileName, pLvdi->item.pszText);
+		break;
+
+	case LVN_COLUMNCLICK:
+		// The user clicked on one of the column headings - sort by
+		// this column.
+		ListView_SortItems(pNm->hdr.hwndFrom, ListViewCompareProc, (LPARAM)(pNm->iSubItem));
+		break;
+
+	default:
+		break;
+	}
+	return 0L;
+}
+
+int CALLBACK ListViewCompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
+{
+	FILEINFO *pFileInfo1 = (FILEINFO *)lParam1;
+	FILEINFO *pFileInfo2 = (FILEINFO *)lParam2;
+	int iResult;
+
+
+	if (pFileInfo1 && pFileInfo2)
+	{
+		switch (lParamSort)
+		{
+			case 0:     // Ordenar por nombre		
+				iResult = _tcscmp(pFileInfo1->cFileName, pFileInfo2->cFileName);
+				//iResult = lstrcmpi(lpStr1, lpStr2);
+				break;
+
+			case 1:     // Ordenar por tamaño		
+				iResult = pFileInfo1->dwFileSize - pFileInfo2->dwFileSize;
+				break;
+
+			default:
+				iResult = 0;
+				break;
+		}
+
+	}
+	return iResult;
+}
+
+// Controlador de mensajes del cuadro Acerca de.
+INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	UNREFERENCED_PARAMETER(lParam);
+	switch (message)
+	{
+	case WM_INITDIALOG:
+		return (INT_PTR)TRUE;
+
+	case WM_COMMAND:
+		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
+		{
+			EndDialog(hDlg, LOWORD(wParam));
+			return (INT_PTR)TRUE;
+		}
+		break;
+	}
+	return (INT_PTR)FALSE;
 }

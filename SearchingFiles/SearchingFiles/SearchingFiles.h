@@ -20,11 +20,11 @@ HWND hMainWindow;
 
 // Function prototypes
 HWND				CreateListView(HWND hWndParent);
-BOOL				InitListViewColumns(HWND hWndListView);
 HWND				CreateMainFrame(HWND hwndParent);
-HWND				CreateAListView(HWND hwndParent);
 ATOM				MyRegisterClass(HINSTANCE hInstance);
 BOOL				InitInstance(HINSTANCE, int);
+LRESULT				NotifyHandler(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+int     CALLBACK	ListViewCompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 
@@ -36,10 +36,8 @@ INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 
 
 #define NUM_ITEMS       9
-#define NUM_COLUMNS     5
+#define NUM_COLUMNS     2
 #define MAX_ITEMLEN     64
-#define MAX_ADDRESS     64
-#define MAX_CITY        16
 #define MAX_PRICE       12
 #define BITMAP_WIDTH    16
 #define BITMAP_HEIGHT   16
@@ -59,11 +57,13 @@ INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 #define BELLEVUE        402
 #define SEATTLE         403
 
-typedef struct tagHOUSEINFO
+typedef struct tagFILENFO
 {
-	char szAddress[MAX_ADDRESS];
-	char szCity[MAX_CITY];
-	int iPrice;
-	int iBeds;
-	int iBaths;
-} HOUSEINFO;
+	TCHAR    cFileName[MAX_PATH];
+	TCHAR    cAlternateFileName[14];
+	FILETIME ftCreationTime;
+	FILETIME ftLastAccessTime;
+	FILETIME ftLastWriteTime;
+	DWORD    dwFileSize;
+	DWORD    dwReserved;
+} FILEINFO;
