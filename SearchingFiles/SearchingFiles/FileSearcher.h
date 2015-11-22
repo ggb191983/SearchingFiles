@@ -3,6 +3,10 @@
  DDL_DIRECTORY | DDL_ARCHIVE | DDL_DRIVES)
 #define DTFLAGS (DT_WORDBREAK | DT_EXPANDTABS | DT_NOCLIP | DT_NOPREFIX)
 #include <memory>
+#include <list>
+#include <string>
+#include <cctype>
+using namespace std;
 
 #pragma once
 class FileSearcher
@@ -10,7 +14,7 @@ class FileSearcher
 public:	
 	void DisplayErrorBox(LPTSTR lpszFunction);
 	void Search(TCHAR fileName);
-	void FindFilesRecursively(LPCTSTR lpFolder, LPCTSTR lpFilePattern);
+	list<WIN32_FIND_DATA> FindFilesRecursively(LPCTSTR lpFolder, LPCTSTR lpFilePattern);
 	~FileSearcher(void);
 
 	void ChangeDirectory(TCHAR *dir);	

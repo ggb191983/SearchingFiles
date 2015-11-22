@@ -248,6 +248,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				fileSearcher->ChangeDirectory(folderBrowserDialog1->SelectedPath);
 			}
 			fileSearcher->Search(*szBuffer);
+			ListView_DeleteAllItems(hWndListView);
 			break;
 		case IDC_SEARCH_TEXT:
 			//SendMessage(hEdit, WM_SETTEXT, sizeof(szBuffer)/sizeof(szBuffer[0]),

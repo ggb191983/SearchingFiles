@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <strsafe.h>
 #include "Shlwapi.h"
+#include <list>
+#include <string>
+#include <cctype>
 
 using namespace std;
 #pragma comment(lib, "User32.lib")
@@ -114,11 +117,13 @@ void FileSearcher::Search(TCHAR fileName){
 }
 
 
-void FileSearcher::FindFilesRecursively(LPCTSTR lpFolder, LPCTSTR lpFilePattern)
-{
+list<WIN32_FIND_DATA> FileSearcher::FindFilesRecursively(LPCTSTR lpFolder, LPCTSTR lpFilePattern)
+{	
 	TCHAR szFullPattern[MAX_PATH];
 	WIN32_FIND_DATA FindFileData;
 	HANDLE hFindFile;
+	list<WIN32_FIND_DATA> fList;
+
 	// first we are going to process any subdirectories
 	PathCombine(szFullPattern, lpFolder, _T("*"));//FindFilesRecursively(_T("C:\\WINDOWS"), _T("*.wav"));
 	hFindFile = FindFirstFile(szFullPattern, &FindFileData);
@@ -147,12 +152,14 @@ void FileSearcher::FindFilesRecursively(LPCTSTR lpFolder, LPCTSTR lpFilePattern)
 			if (!(FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
 			{
 				// found a file; do something with it
-				PathCombine(szFullPattern, lpFolder, FindFileData.cFileName);				
+				PathCombine(szFullPattern, lpFolder, FindFileData.cFileName);			
+				fList.push_back(FindFileData);
 				_tprintf_s(_T("%s\n"), szFullPattern);
 			}
 		} while (FindNextFile(hFindFile, &FindFileData));
 		FindClose(hFindFile);
 	}
+	return fList;
 }
 
 void FileSearcher::DisplayErrorBox(LPTSTR lpszFunction) 
