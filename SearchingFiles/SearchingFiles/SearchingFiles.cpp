@@ -8,6 +8,11 @@
 #include "FileSearcher.h"
 #include "FolderBrowserDialog.h"
 #include "resource.h"
+#include <list>
+#include <string>
+#include <cctype>
+
+using namespace std;
 
 // global array of houses
 FILEINFO rgFileInfo[] =
@@ -178,6 +183,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	PAINTSTRUCT ps;
 	HDC hdc;
 	RECT rect;
+	list<WIN32_FIND_DATA> files;
 	static HCURSOR 	hCursorWE;
 	static HCURSOR 	hCursorNS;
 	static BOOL	bSplitterMoving;
@@ -188,6 +194,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	static HWND hWndListView;
 	TCHAR szBuffer[MAX_PATH + 1];
 	FileSearcher *fileSearcher = FileSearcher::instance();
+	int iItem = 0;
+	int iSubItemCol = 1;
+
+	static FILEINFO rgFILE[100];
+
 
 	switch (message)
 	{
@@ -240,20 +251,52 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		// Parse the menu selections:
 		switch (wmId)
 		{
-		case IDC_SEARCH_BUTTON:
-			SendMessage(hEdit, WM_GETTEXT, sizeof(szBuffer) / sizeof(szBuffer[0]), reinterpret_cast<LPARAM>(szBuffer));
-			//MessageBox(NULL, szBuffer, TEXT("Information"),	MB_ICONINFORMATION);
-			if (folderBrowserDialog1->ShowDialog())
-			{
-				fileSearcher->ChangeDirectory(folderBrowserDialog1->SelectedPath);
-			}
-			fileSearcher->Search(*szBuffer);
-			ListView_DeleteAllItems(hWndListView);
-			break;
-		case IDC_SEARCH_TEXT:
-			//SendMessage(hEdit, WM_SETTEXT, sizeof(szBuffer)/sizeof(szBuffer[0]),
-			//			reinterpret_cast<LPARAM>(szBuffer));
-			break;
+			case IDC_SEARCH_BUTTON:
+				SendMessage(hEdit, WM_GETTEXT, sizeof(szBuffer) / sizeof(szBuffer[0]), reinterpret_cast<LPARAM>(szBuffer));
+				//MessageBox(NULL, szBuffer, TEXT("Information"),	MB_ICONINFORMATION);
+				if (folderBrowserDialog1->ShowDialog())
+				{
+					fileSearcher->ChangeDirectory(folderBrowserDialog1->SelectedPath);
+				}			
+				ListView_DeleteAllItems(hWndListView);
+				files = fileSearcher->FindFilesRecursively(fileSearcher->dir, szBuffer);
+				
+				LV_ITEM lvI;
+				memset(&lvI, 0, sizeof(lvI));
+				lvI.mask = LVIF_TEXT | LVIF_PARAM | LVIF_STATE;   // Text Style
+				lvI.cchTextMax = 256; // Max size of test
+				lvI.state = 0;      //
+				lvI.stateMask = 0;  //			
+				LARGE_INTEGER filesize;					
+								
+				for each (const WIN32_FIND_DATA f in files)
+				{	
+					filesize.HighPart = f.nFileSizeHigh;
+					filesize.LowPart = f.nFileSizeLow;
+					rgFILE[iItem].dwFileSize = (DWORD)filesize.QuadPart;
+					_tcscpy_s(rgFILE[iItem].cFileName, f.cFileName);		
+					lvI.iItem = iItem;
+					lvI.iSubItem = 0;					
+					// The parent window is responsible for storing the text. The List view
+					// window will send a LVN_GETDISPINFO when it needs the text to display/
+					lvI.pszText = LPSTR_TEXTCALLBACK;
+					lvI.cchTextMax = MAX_ITEMLEN;			
+					lvI.lParam = (LPARAM)&rgFILE[iItem];
+
+					if (ListView_InsertItem(hWndListView, &lvI) == -1)
+						return NULL;
+
+					for (int iSubItem = 1; iSubItem < NUM_COLUMNS; iSubItem++)
+					{
+						ListView_SetItemText(hWndListView, iItem++, iSubItem, LPSTR_TEXTCALLBACK);
+					}
+				}
+			
+				break;
+			case IDC_SEARCH_TEXT:
+				//SendMessage(hEdit, WM_SETTEXT, sizeof(szBuffer)/sizeof(szBuffer[0]),
+				//			reinterpret_cast<LPARAM>(szBuffer));
+				break;
 		case IDM_ABOUT:
 			DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
 			break;
@@ -267,7 +310,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 
 	case WM_SIZE:
+		GetClientRect(hWnd, &rect);
 
+		SetWindowPos(hWndListView, NULL, 0, 40, rect.right - rect.left, rect.bottom - rect.top, SWP_NOZORDER); 
 		break;
 
 	case WM_MOUSEMOVE:

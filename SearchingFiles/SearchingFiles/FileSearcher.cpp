@@ -137,7 +137,8 @@ list<WIN32_FIND_DATA> FileSearcher::FindFilesRecursively(LPCTSTR lpFolder, LPCTS
 				PathCombine(szFullPattern, lpFolder, FindFileData.cFileName);
 				if (FindFileData.cFileName[0] == '.')
 					continue;
-				FindFilesRecursively(szFullPattern, lpFilePattern);				
+				list<WIN32_FIND_DATA> lResult = FindFilesRecursively(szFullPattern, lpFilePattern);
+				fList.insert(fList.end(), lResult.begin(), lResult.end());
 			}
 		} while (FindNextFile(hFindFile, &FindFileData));
 		FindClose(hFindFile);
@@ -152,7 +153,7 @@ list<WIN32_FIND_DATA> FileSearcher::FindFilesRecursively(LPCTSTR lpFolder, LPCTS
 			if (!(FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
 			{
 				// found a file; do something with it
-				PathCombine(szFullPattern, lpFolder, FindFileData.cFileName);			
+				PathCombine(szFullPattern, lpFolder, FindFileData.cFileName);				
 				fList.push_back(FindFileData);
 				_tprintf_s(_T("%s\n"), szFullPattern);
 			}

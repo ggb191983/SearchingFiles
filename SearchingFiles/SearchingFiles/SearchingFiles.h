@@ -6,7 +6,7 @@
 #define MAX_LOADSTRING 100
 #define C_COLUMNS 5
 
-#define CUSTOM_FRAME   _T("CustomFrame")
+#define CUSTOM_FRAME _T("CustomFrame")
 
 // Variables globales:
 TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
@@ -37,7 +37,7 @@ INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 
 #define NUM_ITEMS       9
 #define NUM_COLUMNS     2
-#define MAX_ITEMLEN     64
+#define MAX_ITEMLEN     100
 #define MAX_PRICE       12
 #define BITMAP_WIDTH    16
 #define BITMAP_HEIGHT   16

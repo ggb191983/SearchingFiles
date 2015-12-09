@@ -24,10 +24,10 @@ public:
           s_instance = new FileSearcher;
         return s_instance;
     }
+	const TCHAR * dir;
 private:
 	static FileSearcher *s_instance;	
 	FileSearcher();
-	FileSearcher(TCHAR dir);
-	TCHAR * dir;	
+	FileSearcher(TCHAR dir);	
 };
 
