@@ -14,6 +14,7 @@
 #define ID_COLOR_BLUE                   314
 #define ID_COLOR_WHITE                  315
 #define IDD_PATHDIALOG                  316
+#define IDC_CEDIT_SEARCH                317
 #define IDB_LARGEDOC                    319
 #define IDB_SMALLDOC                    320
 #define IDB_BITMAP1                     328
@@ -27,6 +28,6 @@
 #define _APS_NEXT_RESOURCE_VALUE        329
 #define _APS_NEXT_COMMAND_VALUE         32771
 #define _APS_NEXT_CONTROL_VALUE         1000
-#define _APS_NEXT_SYMED_VALUE           317
+#define _APS_NEXT_SYMED_VALUE           318
 #endif
 #endif

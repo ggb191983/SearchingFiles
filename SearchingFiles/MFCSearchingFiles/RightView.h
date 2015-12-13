@@ -60,8 +60,7 @@ protected:
 
 
 #ifndef _DEBUG  // debug version in FileView.cpp
-inline CSquaresDoc* CRightView::GetDocument()
-{
+inline CSquaresDoc* CRightView::GetDocument(){
 	return (CSquaresDoc*)m_pDocument;
 }
 #endif

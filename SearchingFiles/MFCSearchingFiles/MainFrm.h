@@ -37,10 +37,13 @@ public:
 protected:  // control bar embedded members
 	CToolBar          m_wndToolBar;
 	CStatusBar        m_wndStatusBar;
+	CPane			  m_wndSearchPane;
+	CEdit			  m_wndSearch;
 
 // Generated message map functions
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg void OnChange();
 	DECLARE_MESSAGE_MAP()
 
 };

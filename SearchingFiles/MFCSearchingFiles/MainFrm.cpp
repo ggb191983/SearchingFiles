@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "MFCSearchingFiles.h"
+#include "resource.h"
 
 #include "MainFrm.h"
 #include "LeftView.h"
@@ -20,6 +21,8 @@ IMPLEMENT_DYNCREATE(CMainFrame, CFrameWnd)
 
 BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_WM_CREATE()
+	//ON_EN_CHANGE(IDC_CEDIT_SEARCH, OnChangeCEditSearch)
+	ON_EN_CHANGE(IDC_CEDIT_SEARCH, OnChange)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -54,6 +57,14 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 
 	if (!m_wndStatusBar.Create(this))
+	{
+		TRACE0("Failed to create status bar\n");
+		return -1;      // fail to create
+	}
+
+	CRect rect;
+	this->GetClientRect(rect);
+	if (!m_wndSearch.Create(WS_CHILD | WS_VISIBLE | SS_LEFTNOWORDWRAP | WS_BORDER | ES_AUTOHSCROLL, CRect(rect.right-100, 4, rect.right - 10, 20), this, IDC_CEDIT_SEARCH))
 	{
 		TRACE0("Failed to create status bar\n");
 		return -1;      // fail to create
@@ -114,3 +125,11 @@ void CMainFrame::Dump(CDumpContext& dc) const
 
 // CMainFrame message handlers
 
+void CMainFrame::OnChange()
+{
+	if (0x8000 & GetKeyState(VK_RETURN)){
+		CString text;
+		m_wndSearch.GetWindowTextW(text);
+		m_wndSearch.SetWindowTextW(text); // update a label control to match typed text		
+	}	
+}
