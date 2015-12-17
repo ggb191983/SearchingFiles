@@ -1,6 +1,7 @@
 
 // MainFrm.h : interface of the CMainFrame class
 //
+#include "SearchToolBarCtrl.h"
 
 #pragma once
 class CMFCSearchingFilesView;
@@ -35,10 +36,9 @@ public:
 #endif
 
 protected:  // control bar embedded members
-	CToolBar          m_wndToolBar;
-	CStatusBar        m_wndStatusBar;
-	CPane			  m_wndSearchPane;
-	CEdit			  m_wndSearch;
+	CSearchToolBar		m_wndToolBar;
+	CStatusBar			m_wndStatusBar;	
+	CEdit				m_wndSearch;
 
 // Generated message map functions
 protected:

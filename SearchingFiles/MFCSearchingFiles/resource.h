@@ -19,14 +19,17 @@
 #define IDB_SMALLDOC                    320
 #define IDB_BITMAP1                     328
 #define IDB_TOOLBAR                     328
+#define IDR_SEARCH                      329
+#define ID_SEARCH_BUTTON                32771
+#define ID_BUTTON32774                  32774
 #define IDB_DRIVEIMAGES                 65535
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        329
-#define _APS_NEXT_COMMAND_VALUE         32771
+#define _APS_NEXT_RESOURCE_VALUE        331
+#define _APS_NEXT_COMMAND_VALUE         32775
 #define _APS_NEXT_CONTROL_VALUE         1000
 #define _APS_NEXT_SYMED_VALUE           318
 #endif

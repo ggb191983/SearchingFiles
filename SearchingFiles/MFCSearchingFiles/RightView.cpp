@@ -81,11 +81,36 @@ void CRightView::OnInitialUpdate()
 	CListView::OnInitialUpdate();
 
 	//
+	// Populate the list view with items.
+	//
+	TCHAR szPath[MAX_PATH];
+	::GetCurrentDirectory(sizeof(szPath) / sizeof(TCHAR), szPath);
+
+	//
 	// Initialize the image list.
 	//
-	m_ilLarge.Create(IDB_LARGEDOC, 32, 1, RGB(255, 0, 255));
+	//m_ilLarge.Create(IDB_LARGEDOC, 32, 1, RGB(255, 0, 255));
+	//m_ilSmall.Create(IDB_SMALLDOC, 16, 1, RGB(255, 0, 255));
 
-	m_ilSmall.Create(IDB_SMALLDOC, 16, 1, RGB(255, 0, 255));
+	HIMAGELIST  hSystemSmallImageList, hSystemLargeImageList;
+	SHFILEINFO  ssfi, lsfi;
+	
+	//get a handle to the system small icon list   
+	hSystemSmallImageList = (HIMAGELIST)SHGetFileInfo((LPCTSTR)szPath,
+													   0,    
+													   &ssfi,
+													   sizeof(SHFILEINFO),   
+													   SHGFI_SYSICONINDEX | SHGFI_SMALLICON); 
+
+	m_ilSmall.Attach(hSystemSmallImageList);
+
+	hSystemLargeImageList = (HIMAGELIST)SHGetFileInfo((LPCTSTR)szPath,
+														0,
+														&lsfi,
+														sizeof(SHFILEINFO),
+														SHGFI_SYSICONINDEX | SHGFI_ICON);
+
+	m_ilLarge.Attach(hSystemLargeImageList);
 
 	GetListCtrl().SetImageList(&m_ilLarge, LVSIL_NORMAL);
 	GetListCtrl().SetImageList(&m_ilSmall, LVSIL_SMALL);
@@ -96,12 +121,7 @@ void CRightView::OnInitialUpdate()
 	GetListCtrl().InsertColumn(0, _T("File Name"), LVCFMT_LEFT, 192);
 	GetListCtrl().InsertColumn(1, _T("Size"), LVCFMT_RIGHT, 96);
 	GetListCtrl().InsertColumn(2, _T("Last Modified"), LVCFMT_CENTER, 128);
-
-	//
-	// Populate the list view with items.
-	//
-	TCHAR szPath[MAX_PATH];
-	::GetCurrentDirectory(sizeof(szPath) / sizeof(TCHAR), szPath);
+	
 	Refresh(szPath);
 }
 
@@ -113,6 +133,20 @@ CSquaresDoc* CRightView::GetDocument() // non-debug version is inline
 
 ///////////////////////////////////////////////////////////////////////////
 // CFileView message handlers
+
+int CRightView::GetIconIndex(const CString& csFileName)  //full path and file name
+{
+	SHFILEINFO    sfi;
+
+	SHGetFileInfo(
+		(LPCTSTR)csFileName,
+		0,
+		&sfi,
+		sizeof(SHFILEINFO),
+		SHGFI_SYSICONINDEX | SHGFI_SMALLICON);
+
+	return sfi.iIcon;
+}
 
 int CRightView::Refresh(LPCTSTR pszPath)
 {
@@ -173,7 +207,7 @@ BOOL CRightView::AddItem(int nIndex, WIN32_FIND_DATA *pfd)
 		e->Delete();
 		return FALSE;
 	}
-
+	
 	pItem->strFileName = pfd->cFileName;
 	pItem->nFileSizeLow = pfd->nFileSizeLow;
 	pItem->ftLastWriteTime = pfd->ftLastWriteTime;
@@ -185,7 +219,7 @@ BOOL CRightView::AddItem(int nIndex, WIN32_FIND_DATA *pfd)
 	lvi.mask = LVIF_TEXT | LVIF_IMAGE | LVIF_PARAM;
 	lvi.iItem = nIndex;
 	lvi.iSubItem = 0;
-	lvi.iImage = 0;
+	lvi.iImage = GetIconIndex(m_strPath + _T("\\") + pfd->cFileName);
 	lvi.pszText = LPSTR_TEXTCALLBACK;
 	lvi.lParam = (LPARAM)pItem;
 
@@ -197,9 +231,12 @@ BOOL CRightView::AddItem(int nIndex, WIN32_FIND_DATA *pfd)
 
 void CRightView::FreeItemMemory()
 {
+	m_ilSmall.Detach();
+	m_ilLarge.Detach();
+
 	int nCount = GetListCtrl().GetItemCount();
 	if (nCount) {
-		for (int i = 0; i<nCount; i++)
+		for (int i = 0; i < nCount; i++)
 			delete (ITEMINFO*)GetListCtrl().GetItemData(i);
 	}
 }
@@ -221,7 +258,7 @@ void CRightView::OnGetDispInfo(NMHDR* pNMHDR, LRESULT* pResult)
 		switch (pDispInfo->item.iSubItem) {
 
 		case 0: // File name.
-			::lstrcpy(pDispInfo->item.pszText, pItem->strFileName);
+			::lstrcpy(pDispInfo->item.pszText, pItem->strFileName);			
 			break;
 
 		case 1: // File size.

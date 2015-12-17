@@ -25,8 +25,8 @@ public:
 protected:
 	CRightView();           // protected constructor used by dynamic creation
 	virtual ~CRightView();
-	virtual void OnInitialUpdate(); // called first time after construct
-	
+	virtual void OnInitialUpdate(); // called first time after construct	
+
 #ifdef _DEBUG
 	virtual void AssertValid() const;
 #ifndef _WIN32_WCE
@@ -38,6 +38,7 @@ protected:
 	CString m_strPath;
 	void FreeItemMemory();
 	BOOL AddItem(int nIndex, WIN32_FIND_DATA* pfd);
+	int GetIconIndex(const CString& csFileName);
 	CImageList m_ilSmall;
 	CImageList m_ilLarge;
 	//{{AFX_MSG(CFileView)
